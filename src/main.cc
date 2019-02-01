@@ -15,7 +15,7 @@
 #include <Wt/WBootstrapTheme.h>
 #include <Wt/WLocale.h>
 
-#include "DeployTool.h"
+#include "FormalisedLog.h"
 #include "Session.h"
 
 using namespace Wt;
@@ -25,7 +25,7 @@ static WLocale theLocale;
 std::unique_ptr<WApplication> createApplication(const WEnvironment& env) {
     auto app = std::make_unique<WApplication>(env);
 
-    app->setTitle("Deploy Tool");
+    app->setTitle("Formalised Log Tool");
 
     app->root()->addStyleClass("container");
     auto theme = std::make_shared<Wt::WBootstrapTheme>();
@@ -38,7 +38,7 @@ std::unique_ptr<WApplication> createApplication(const WEnvironment& env) {
 
     app->setLocale(theLocale);
 
-    app->useStyleSheet("DeployTool.css");
+    app->useStyleSheet("FormalisedLog.css");
 
     app->root()->addWidget(std::make_unique<DeployTool>());
 

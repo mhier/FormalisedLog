@@ -20,12 +20,10 @@
 #include <Wt/Auth/Dbo/UserDatabase.h>
 
 #include "Session.h"
-#include "DeployTool.h"
-#include "GroupList.h"
-#include "Search.h"
-#include "VersionSetList.h"
-#include "GroupTemplateList.h"
-#include "ItemList.h"
+#include "FormalisedLog.h"
+#include "EditForm.h"
+#include "Welcome.h"
+#include "Form.h"
 
 DeployTool::DeployTool() {
     session_.login().changed().connect(this, &DeployTool::onAuthEvent);
@@ -37,10 +35,10 @@ DeployTool::DeployTool() {
     authWidget->setModel(std::move(authModel));
     authWidget->setRegistrationEnabled(false);
 
-    std::unique_ptr<WText> title(std::make_unique<WText>("<h1>Deployment Tool</h1>"));
+    std::unique_ptr<WText> title(std::make_unique<WText>("<h1>Formalised Log Tool</h1>"));
     addWidget(std::move(title));
 
-    authWidgetPtr = addWidget(std::move(authWidget));
+    //authWidgetPtr = addWidget(std::move(authWidget));
 
     mainStack_ = new WStackedWidget();
     mainStack_->setHeight("100vH");
@@ -48,7 +46,10 @@ DeployTool::DeployTool() {
 
     WApplication::instance()->internalPathChanged().connect(this, &DeployTool::handleInternalPath);
 
-    authWidgetPtr->processEnvironment();
+    //authWidgetPtr->processEnvironment();
+
+    createMenu();
+    handleInternalPath(WApplication::instance()->internalPath());
 }
 
 void DeployTool::onAuthEvent() {
@@ -64,35 +65,21 @@ void DeployTool::onAuthEvent() {
 
 void DeployTool::handleInternalPath(const std::string &internalPath) {
     Wt::Dbo::Transaction transaction(session_.session_);
-    if(session_.login().loggedIn()) {
+//    if(session_.login().loggedIn()) {
       contentStack_->clear();
-      if (internalPath == "/search") {
-        contentStack_->addWidget( std::make_unique<Search>(session_) );
+      if (internalPath == "/") {
+        contentStack_->addWidget( std::make_unique<Welcome>(session_) );
       }
-      else if (internalPath == "/versions") {
-        contentStack_->addWidget( std::make_unique<VersionSetList>(session_) );
-      }
-      else if (internalPath == "/groups") {
-        contentStack_->addWidget( std::make_unique<GroupList>(session_) );
-      }
-      else if (internalPath == "/templates") {
-        contentStack_->addWidget( std::make_unique<GroupTemplateList>(session_) );
-      }
-      else if (internalPath == "/items") {
-        contentStack_->addWidget( std::make_unique<ItemList>(session_) );
-      }
-      else if (internalPath == "/password") {
-        //contentStack_->addWidget(std::make_unique<Wt::Auth::UpdatePasswordWidget>(session_.user(), ));
-        auto authUser = session_.users_->find(session_.user()->authInfos.front());
-        authWidgetPtr->letUpdatePassword(authUser, true);
+      else if (internalPath == "/edit") {
+        contentStack_->addWidget( std::make_unique<EditForm>(session_) );
       }
       else {
-        WApplication::instance()->setInternalPath("/search",  true);
+        //contentStack_->addWidget( std::make_unique<FormShow>(session_) );
       }
-    }
+/*    }
     else {
       WApplication::instance()->setInternalPath("/",  true);
-    }
+    } */
 }
 
 void DeployTool::createMenu() {
@@ -120,11 +107,11 @@ void DeployTool::createMenu() {
     menu_->setInternalPathEnabled();
     menu_->setInternalBasePath("/");
 
-    menu_->addItem("Search")->setPathComponent("search");
-    menu_->addItem("Versions sets")->setPathComponent("versions");
-    menu_->addItem("Groups")->setPathComponent("groups");
-    menu_->addItem("Group templates")->setPathComponent("templates");
-    menu_->addItem("Items")->setPathComponent("items");
-    menu_->addItem("Change password")->setPathComponent("password");
+    auto forms = session_.session_.find<Form>().resultList();
+    for(auto form : forms) {
+      menu_->addItem(form->title)->setPathComponent(form->title);
+    }
+
+    menu_->addItem("Edit/Create Forms")->setPathComponent("edit");
 
 }

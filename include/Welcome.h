@@ -7,28 +7,22 @@
  * See the LICENSE file for terms of use.
  */
 
-#ifndef INCLUDE_SEARCH_H_
-#define INCLUDE_SEARCH_H_
+#ifndef INCLUDE_WELCOME_H_
+#define INCLUDE_WELCOME_H_
 
-#include "Item.h"
 #include "Session.h"
-#include "UpdateableWidget.h"
-#include "VersionUpdateDialog.h"
 
 #include <Wt/Dbo/Dbo.h>
 #include <Wt/WContainerWidget.h>
 
 using namespace Wt;
 
-class Search : public WContainerWidget, public UpdateableWidget {
+class Welcome : public WContainerWidget {
   public:
-    Search(Session &session);
-
-    void update() override;
+    Welcome(Session &session);
 
   private:
     Session &session_;
-    std::unique_ptr<VersionUpdateDialog> versionUpdateDialog_;
 };
 
-#endif // INCLUDE_SEARCH_H_
+#endif // INCLUDE_WELCOME_H_

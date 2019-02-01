@@ -28,12 +28,7 @@
 
 #include <boost/program_options.hpp>
 
-#include "Item.h"
-#include "Group.h"
-#include "GroupTemplate.h"
-#include "VersionSet.h"
-#include "InstanceVersion.h"
-#include "ItemInstance.h"
+#include "Form.h"
 
 namespace dbo = Wt::Dbo;
 namespace po = boost::program_options;
@@ -53,7 +48,7 @@ namespace {
 } // anon. namespace
 
 void Session::configureAuth() {
-    myAuthService.setAuthTokensEnabled(true, "DeployToolCookie");
+    myAuthService.setAuthTokensEnabled(true, "FormalisedLogCookie");
     myAuthService.setEmailVerificationEnabled(true);
 
     auto verifier = std::make_unique<Auth::PasswordVerifier>();
@@ -78,7 +73,7 @@ Session::Session() {
     ;
 
     po::variables_map vm;
-    store(po::parse_config_file<char>("DeployTool.cfg", options), vm);
+    store(po::parse_config_file<char>("FormalisedLog.cfg", options), vm);
     po::notify(vm);
 
     if(vm.count("sqlite") && vm.count("mysql")) {
@@ -118,14 +113,8 @@ Session::Session() {
     session_.mapClass<AuthInfo>("auth_info");
     session_.mapClass<AuthInfo::AuthIdentityType>("auth_identity");
     session_.mapClass<AuthInfo::AuthTokenType>("auth_token");
-    session_.mapClass<Group>("groups");
-    session_.mapClass<GroupTemplate>("group_templates");
-    session_.mapClass<VersionSet>("group_versions");
-    session_.mapClass<InstanceVersion>("instance_versions");
-    session_.mapClass<Item>("items");
-    session_.mapClass<KeyValue<Item>>("item_parameters");
-    session_.mapClass<ItemInstance>("item_instances");
-    session_.mapClass<KeyValue<ItemInstance>>("item_instance_parameters");
+    session_.mapClass<Form>("forms");
+    session_.mapClass<FormField>("formfields");
     users_ = std::make_unique<UserDatabase>(session_);
 
     dbo::Transaction transaction(session_);
