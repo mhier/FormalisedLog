@@ -18,21 +18,20 @@ class PreviewDialog;
 
 class ShowForm : public WContainerWidget {
  public:
- ShowForm(Session &session, const std::string &identifier);
+  ShowForm(Session& session, const std::string& identifier);
 
- private:
-  Session &session_;
+  Session& session_;
   Wt::Dbo::ptr<Form> form_;
   bool createNew{false};
   size_t nRows{0};
-  WTable *table;
+  WTable* table;
   std::vector<WLineEdit*> fieldValues;
   std::unique_ptr<PreviewDialog> previewDialog_;
 };
 
 class PreviewDialog : public WDialog {
  public:
-  PreviewDialog(Session& session, ShowForm *owner);
+  PreviewDialog(Session& session, ShowForm* owner);
 };
 
 #endif // INCLUDE_SHOW_FORM_H_
