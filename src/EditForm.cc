@@ -13,8 +13,10 @@
 #include <Wt/WText.h>
 #include <Wt/WTable.h>
 #include <Wt/WVBoxLayout.h>
-#include <Wt/WInPlaceEdit.h>
+#include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
+#include <Wt/WTextArea.h>
+#include <Wt/WApplication.h>
 
 class FormDialog;
 
@@ -39,8 +41,8 @@ void EditForm::update() {
     table->addStyleClass("table form-inline table-hover");
 
     table->elementAt(0, 0)->addWidget(std::make_unique<WText>("#"));
-    table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Hostname"));
-    table->elementAt(0, 2)->addWidget(std::make_unique<WText>("Template"));
+    table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Form title"));
+    table->elementAt(0, 2)->addWidget(std::make_unique<WText>("Description"));
 
     auto forms = session_.session_.find<Form>().resultList();
     int row = 0;
@@ -49,11 +51,12 @@ void EditForm::update() {
 
       table->elementAt(row, 0)->addWidget(std::make_unique<WText>(WString("{1}").arg(row)));
       table->elementAt(row, 1)->addWidget(std::make_unique<WText>(form->title));
+      table->elementAt(row, 2)->addWidget(std::make_unique<WText>(form->description));
 
-      for(int i=0; i<2; ++i) {
+      for(int i=0; i<3; ++i) {
         table->elementAt(row,i)->clicked().connect(this, [=] {
-//          groupDialog_ = std::make_unique<GroupDialog>(this, session_, item);
-//          groupDialog_->show();
+        formDialog_ = std::make_unique<FormDialog>(*this, session_, form);
+        formDialog_->show();
         });
       }
 
@@ -72,42 +75,72 @@ void EditForm::update() {
 /**********************************************************************************************************************/
 
 void FormDialog::update() {
+    titleBar()->clear();
     contents()->clear();
     footer()->clear();
     contents()->addStyleClass("form-group");
     Dbo::Transaction transaction(session_.session_);
 
+    titleBar()->addWidget(std::make_unique<WText>("Edit form"));
+
     auto layout = contents()->setLayout(std::make_unique<Wt::WVBoxLayout>());
 
-    auto formTitle = layout->addWidget(std::make_unique<WInPlaceEdit>());
+    auto formTitle = layout->addWidget(std::make_unique<WLineEdit>());
     formTitle->setPlaceholderText("Title of the form");
-    formTitle->setButtonsEnabled(false);
-    auto formDescription = layout->addWidget(std::make_unique<WInPlaceEdit>());
+    formTitle->setText(form_.get()->title);
+    auto formDescription = layout->addWidget(std::make_unique<WTextArea>());
     formDescription->setPlaceholderText("Detailled description displayed on top");
-    formDescription->setButtonsEnabled(false);
+    formDescription->setText(form_.get()->description);
 
-    auto table = layout->addWidget(std::make_unique<WTable>());
+    table = layout->addWidget(std::make_unique<WTable>());
     table->setHeaderCount(1);
     table->setWidth(WLength("100%"));
     table->addStyleClass("table form-inline table-hover");
 
     table->elementAt(0, 0)->addWidget(std::make_unique<WText>("Field title"));
     table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Description"));
-    int row = 0;
-    for(auto field : form_.get()->fields) {
-      ++row;
-      table->elementAt(row, 0)->addWidget(std::make_unique<WInPlaceEdit>(field->title));
-      table->elementAt(row, 1)->addWidget(std::make_unique<WInPlaceEdit>(field->description));
-    }
-    ++row;
-    {
-      auto title = table->elementAt(row, 0)->addWidget(std::make_unique<WInPlaceEdit>());
-      title->setPlaceholderText("Field title");
-      title->setButtonsEnabled(false);
-      auto description = table->elementAt(row, 1)->addWidget(std::make_unique<WInPlaceEdit>());
-      description->setPlaceholderText("Description / help text");
-      description->setButtonsEnabled(false);
-    }
+    for(auto field : form_.get()->fields) addRow(field->title, field->description);
+    addRow();
+
+    auto save = footer()->addWidget(std::make_unique<WPushButton>("Save"));
+    save->clicked().connect([=]{
+      Dbo::Transaction transact(session_.session_);
+      form_.modify()->title = formTitle->text().toUTF8();
+      form_.modify()->description = formDescription->text().toUTF8();
+      if(createNew) session_.session_.add(form_);
+      form_.modify()->fields.clear();
+      for(size_t i=0; i<nRows; ++i) {
+        if(fieldTitles[i]->text().toUTF8().size() == 0) continue;
+        Wt::Dbo::ptr<FormField> field = std::make_unique<FormField>();
+        field.modify()->form = form_;
+        field.modify()->title = fieldTitles[i]->text().toUTF8();
+        field.modify()->description = fieldDescriptions[i]->text().toUTF8();
+        form_.modify()->fields.insert(field);
+      }
+      this->hide();
+      owner_.update();
+    });
+    auto cancel = footer()->addWidget(std::make_unique<WPushButton>("Cancel"));
+    cancel->clicked().connect([this]{
+      this->hide();
+    });
 
 }
 
+void FormDialog::addRow(const std::string &titleValue, const std::string &descriptionValue) {
+    ++nRows;
+    auto title = table->elementAt(nRows, 0)->addWidget(std::make_unique<WLineEdit>());
+    fieldTitles.push_back(title);
+    title->setPlaceholderText("Field title");
+    title->setText(titleValue);
+    title->setWidth(WLength("100%"));
+    size_t thisRow = nRows;
+    title->changed().connect([=] {
+      if(title->text().toUTF8().size() > 0 && thisRow == this->nRows) addRow();
+    });
+    auto description = table->elementAt(nRows, 1)->addWidget(std::make_unique<WLineEdit>());
+    fieldDescriptions.push_back(description);
+    description->setPlaceholderText("Description / help text");
+    description->setText(descriptionValue);
+    description->setWidth(WLength("100%"));
+}

@@ -50,6 +50,12 @@ class FormDialog : public WDialog {
     Session &session_;
     Wt::Dbo::ptr<Form> form_;
     bool createNew{false};
+    size_t nRows{0};
+    WTable *table;
+    std::vector<WLineEdit*> fieldTitles;
+    std::vector<WLineEdit*> fieldDescriptions;
+
+    void addRow(const std::string &title="", const std::string &description="");
 };
 
 #endif // INCLUDE_EDIT_FORM_H_
