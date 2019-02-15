@@ -2,7 +2,7 @@
  * FormalisedLog - Tool for creation of standardised log book entires at XFEL and similar DESY facilities
  */
 
-#include "EditForm.h"
+#include "ShowForm.h"
 #include "Form.h"
 
 #include <Wt/WText.h>
@@ -13,66 +13,52 @@
 #include <Wt/WTextArea.h>
 #include <Wt/WApplication.h>
 
-class FormDialog;
-
-EditForm::EditForm(Session& session) : session_(session) {
-  update();
-}
-
-void EditForm::update() {
-  clear();
-
+ShowForm::ShowForm(Session& session, const std::string& identifier) : session_(session) {
   auto user = session_.user();
+  auto layout = setLayout(std::make_unique<Wt::WVBoxLayout>());
 
   dbo::Transaction transaction(session_.session_);
+  auto forms = session_.session_.find<Form>().where("identifier = ?").bind(identifier).resultList();
+  if(forms.size() != 1) {
+    layout->addWidget(std::make_unique<WText>("Error: form not found."));
+    return;
+  }
+  form_ = forms.front();
 
-  addWidget(std::make_unique<WText>("<h2>Create and edit forms</h2>"));
+  layout->addWidget(std::make_unique<WText>("<h2>" + form_->title + "</h2>"));
+  layout->addWidget(std::make_unique<WText>(form_->description));
 
-  auto table = std::make_unique<WTable>();
+  table = layout->addWidget(std::make_unique<WTable>());
   table->setHeaderCount(1);
   table->setWidth(WLength("100%"));
   table->addStyleClass("table form-inline table-hover");
 
-  table->elementAt(0, 0)->addWidget(std::make_unique<WText>("#"));
-  table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Form title"));
-  table->elementAt(0, 2)->addWidget(std::make_unique<WText>("Description"));
+  table->elementAt(0, 0)->addWidget(std::make_unique<WText>("Name"));
+  table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Value"));
 
-  auto forms = session_.session_.find<Form>().resultList();
-  int row = 0;
-  for(auto form : forms) {
-    row++;
+  int nRows = 1;
+  for(auto field : form_->fields) {
+    auto title = table->elementAt(nRows, 0)->addWidget(std::make_unique<WText>(field->title));
+    title->setToolTip(field->description);
 
-    table->elementAt(row, 0)->addWidget(std::make_unique<WText>(WString("{1}").arg(row)));
-    table->elementAt(row, 1)->addWidget(std::make_unique<WText>(form->title));
-    table->elementAt(row, 2)->addWidget(std::make_unique<WText>(form->description));
-
-    for(int i = 0; i < 3; ++i) {
-      table->elementAt(row, i)->clicked().connect(this, [=] {
-        formDialog_ = std::make_unique<FormDialog>(*this, session_, form);
-        formDialog_->show();
-      });
-    }
+    fieldValues.push_back(table->elementAt(nRows, 1)->addWidget(std::make_unique<WLineEdit>()));
+    fieldValues.back()->setToolTip(field->description);
+    fieldValues.back()->setWidth(WLength("100%"));
+    ++nRows;
   }
 
-  addWidget(std::move(table));
-
-  auto newForm = addWidget(std::make_unique<Wt::WPushButton>("Create form..."));
-  newForm->clicked().connect(this, [=] {
-    formDialog_ = std::make_unique<FormDialog>(*this, session_, nullptr);
-    formDialog_->show();
+  auto preview = layout->addWidget(std::make_unique<WPushButton>("Preview and submit"));
+  preview->clicked().connect([=] {
+    previewDialog_ = std::make_unique<PreviewDialog>(session_, this);
+    previewDialog_->show();
   });
 }
 
-/**********************************************************************************************************************/
-
-void FormDialog::update() {
-  titleBar()->clear();
-  contents()->clear();
-  footer()->clear();
+PreviewDialog::PreviewDialog(Session& session, ShowForm* owner) {
   contents()->addStyleClass("form-group");
-  Dbo::Transaction transaction(session_.session_);
+  Dbo::Transaction transaction(session.session_);
 
-  titleBar()->addWidget(std::make_unique<WText>("Edit form"));
+  titleBar()->addWidget(std::make_unique<WText>("Preview"));
 
   auto layout = contents()->setLayout(std::make_unique<Wt::WVBoxLayout>());
 
@@ -120,22 +106,4 @@ void FormDialog::update() {
   });
   auto cancel = footer()->addWidget(std::make_unique<WPushButton>("Cancel"));
   cancel->clicked().connect([this] { this->hide(); });
-}
-
-void FormDialog::addRow(const std::string& titleValue, const std::string& descriptionValue) {
-  ++nRows;
-  auto title = table->elementAt(nRows, 0)->addWidget(std::make_unique<WLineEdit>());
-  fieldTitles.push_back(title);
-  title->setPlaceholderText("Field title");
-  title->setText(titleValue);
-  title->setWidth(WLength("100%"));
-  size_t thisRow = nRows;
-  title->changed().connect([=] {
-    if(title->text().toUTF8().size() > 0 && thisRow == this->nRows) addRow();
-  });
-  auto description = table->elementAt(nRows, 1)->addWidget(std::make_unique<WLineEdit>());
-  fieldDescriptions.push_back(description);
-  description->setPlaceholderText("Description / help text");
-  description->setText(descriptionValue);
-  description->setWidth(WLength("100%"));
 }

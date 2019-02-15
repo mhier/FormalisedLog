@@ -1,10 +1,5 @@
 /*
- * WtTimeTrack - Web-based time tracker
- *
- * Copyright (C) 2017 Martin Hierholzer, Hamburg, Germany
- *
- * This program is released under the GNU GENERAL PUBLIC LICENSE v3.0
- * See the LICENSE file for terms of use.
+ * FormalisedLog - Tool for creation of standardised log book entires at XFEL and similar DESY facilities
  */
 
 #ifndef INCLUDE_EDIT_FORM_H_
@@ -22,40 +17,39 @@ using namespace Wt;
 class FormDialog;
 
 class EditForm : public WContainerWidget {
-  public:
-    EditForm(Session &session);
+ public:
+  EditForm(Session& session);
 
-    void update();
+  void update();
 
-  private:
-    Session &session_;
-    std::unique_ptr<FormDialog> formDialog_;
+ private:
+  Session& session_;
+  std::unique_ptr<FormDialog> formDialog_;
 };
 
 class FormDialog : public WDialog {
-  public:
-    FormDialog(EditForm &owner, Session &session, Wt::Dbo::ptr<Form> form)
-      : owner_(owner), session_(session), form_(form)
-    {
-      if(form_.get() == nullptr) {
-        createNew = true;
-        form_ = std::make_unique<Form>();
-      }
-      update();
+ public:
+  FormDialog(EditForm& owner, Session& session, Wt::Dbo::ptr<Form> form)
+  : owner_(owner), session_(session), form_(form) {
+    if(form_.get() == nullptr) {
+      createNew = true;
+      form_ = std::make_unique<Form>();
     }
+    update();
+  }
 
-    void update();
+  void update();
 
-    EditForm &owner_;
-    Session &session_;
-    Wt::Dbo::ptr<Form> form_;
-    bool createNew{false};
-    size_t nRows{0};
-    WTable *table;
-    std::vector<WLineEdit*> fieldTitles;
-    std::vector<WLineEdit*> fieldDescriptions;
+  EditForm& owner_;
+  Session& session_;
+  Wt::Dbo::ptr<Form> form_;
+  bool createNew{false};
+  size_t nRows{0};
+  WTable* table;
+  std::vector<WLineEdit*> fieldTitles;
+  std::vector<WLineEdit*> fieldDescriptions;
 
-    void addRow(const std::string &title="", const std::string &description="");
+  void addRow(const std::string& title = "", const std::string& description = "");
 };
 
 #endif // INCLUDE_EDIT_FORM_H_

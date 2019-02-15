@@ -1,10 +1,5 @@
 /*
- * DeployTool - Web-based software/firmware deployment tool
- *
- * Copyright (C) 2018 Martin Hierholzer, Deutsches Elektronen-Synchrotron DESY Hamburg, Germany
- *
- * This program is released under the GNU GENERAL PUBLIC LICENSE v3.0
- * See the LICENSE file for terms of use.
+ * FormalisedLog - Tool for creation of standardised log book entires at XFEL and similar DESY facilities
  */
 
 #ifndef INCLUDE_FORM_H_
@@ -16,40 +11,51 @@
 class FormField;
 
 class Form {
-  public:
-    Form() {}
+ public:
+  Form() {}
 
-    std::string title;
-    std::string description;
-    dbo::collection<dbo::ptr<FormField>> fields;
+  std::string identifier;
+  std::string title;
+  std::string description;
+  Wt::Dbo::collection<Wt::Dbo::ptr<FormField>> fields;
 
-    template<class Action>
-    void persist ( Action& a ) {
-      Wt::Dbo::field ( a, title, "title" );
-      Wt::Dbo::field ( a, description, "description" );
-      dbo::hasMany ( a, fields, dbo::ManyToOne, "fields_of_form" );
-    }
+  static constexpr size_t identifierLength{20};
 
+  template<class Action>
+  void persist(Action& a) {
+    Wt::Dbo::id(a, identifier, "identifier", identifierLength); // special database key, also see below
+    Wt::Dbo::field(a, title, "title");
+    Wt::Dbo::field(a, description, "description");
+    Wt::Dbo::hasMany(a, fields, Wt::Dbo::ManyToOne, "fields_of_form");
+  }
 };
 
+// special configuration for database key
+namespace Wt { namespace Dbo {
+  template<>
+  struct dbo_traits<Form> : public dbo_default_traits {
+    typedef std::string IdType;
+    static IdType invalidId() { return std::string(); }
+    static const char* surrogateIdField() { return 0; }
+  };
+}} // namespace Wt::Dbo
+
 class FormField {
-  public:
-    FormField() {}
+ public:
+  FormField() {}
 
-    std::string title;
-    std::string description;
-    std::string value;
-    dbo::ptr<Form> form;
+  std::string title;
+  std::string description;
+  std::string value;
+  dbo::ptr<Form> form;
 
-    template<class Action>
-    void persist ( Action& a ) {
-      Wt::Dbo::field ( a, title, "title" );
-      Wt::Dbo::field ( a, description, "description" );
-      Wt::Dbo::field ( a, value, "value" );
-      dbo::belongsTo( a, form, "fields_of_form" );
-
-    }
-
+  template<class Action>
+  void persist(Action& a) {
+    Wt::Dbo::field(a, title, "title");
+    Wt::Dbo::field(a, description, "description");
+    Wt::Dbo::field(a, value, "value");
+    dbo::belongsTo(a, form, "fields_of_form");
+  }
 };
 
 #endif /* INCLUDE_FORM_H_ */

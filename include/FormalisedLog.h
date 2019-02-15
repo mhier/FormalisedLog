@@ -1,10 +1,5 @@
 /*
- * DeployTool - Web-based software/firmware deployment tool
- *
- * Copyright (C) 2018 Martin Hierholzer, Deutsches Elektronen-Synchrotron DESY Hamburg, Germany
- *
- * This program is released under the GNU GENERAL PUBLIC LICENSE v3.0
- * See the LICENSE file for terms of use.
+ * FormalisedLog - Tool for creation of standardised log book entires at XFEL and similar DESY facilities
  */
 
 #ifndef INCLUDE_DEPLOY_TOOL_H_
@@ -20,29 +15,29 @@ using namespace Wt;
 namespace Wt {
   class WStackedWidget;
   class WAnchor;
-}
+} // namespace Wt
 
 class Session;
 
 class DeployTool : public WContainerWidget {
-  public:
-    DeployTool();
+ public:
+  DeployTool();
 
-    void handleInternalPath(const std::string &internalPath);
+  void handleInternalPath(const std::string& internalPath);
 
-  private:
-    WStackedWidget    *mainStack_{nullptr};
-    WStackedWidget    *contentStack_{nullptr};
+ private:
+  WStackedWidget* mainStack_{nullptr};
+  WStackedWidget* contentStack_{nullptr};
 
-    Wt::Auth::AuthWidget *authWidgetPtr;
+  Wt::Auth::AuthWidget* authWidgetPtr;
 
-    Session session_;
+  Session session_;
 
-    void onAuthEvent();
-    void createMenu();
+  void onAuthEvent();
+  void createMenu();
 
-    void clockIn();
-    void clockOut();
+  void clockIn();
+  void clockOut();
 };
 
-#endif //INCLUDE_DEPLOY_TOOL_H_
+#endif // INCLUDE_DEPLOY_TOOL_H_

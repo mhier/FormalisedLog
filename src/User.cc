@@ -1,10 +1,5 @@
 /*
- * WtTimeTrack - Web-based time tracker
- *
- * Copyright (C) 2017 Martin Hierholzer, Hamburg, Germany
- *
- * This program is released under the GNU GENERAL PUBLIC LICENSE v3.0
- * See the LICENSE file for terms of use.
+ * FormalisedLog - Tool for creation of standardised log book entires at XFEL and similar DESY facilities
  */
 
 #include "User.h"

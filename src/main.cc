@@ -1,10 +1,5 @@
 /*
- * WtTimeTrack - Web-based time tracker
- *
- * Copyright (C) 2017 Martin Hierholzer, Hamburg, Germany
- *
- * This program is released under the GNU GENERAL PUBLIC LICENSE v3.0
- * See the LICENSE file for terms of use.
+ * FormalisedLog - Tool for creation of standardised log book entires at XFEL and similar DESY facilities
  */
 
 #include <unistd.h>
@@ -23,42 +18,42 @@ using namespace Wt;
 static WLocale theLocale;
 
 std::unique_ptr<WApplication> createApplication(const WEnvironment& env) {
-    auto app = std::make_unique<WApplication>(env);
+  auto app = std::make_unique<WApplication>(env);
 
-    app->setTitle("Formalised Log Tool");
+  app->setTitle("Formalised Log Tool");
 
-    app->root()->addStyleClass("container");
-    auto theme = std::make_shared<Wt::WBootstrapTheme>();
-    theme->setVersion(Wt::BootstrapVersion::v3);
-    theme->setResponsive(false);
-    app->setTheme(theme);
+  app->root()->addStyleClass("container");
+  auto theme = std::make_shared<Wt::WBootstrapTheme>();
+  theme->setVersion(Wt::BootstrapVersion::v3);
+  theme->setResponsive(false);
+  app->setTheme(theme);
 
-    theLocale = WLocale("en_GB");
-    theLocale.setTimeZone(date::current_zone());
+  theLocale = WLocale("en_GB");
+  theLocale.setTimeZone(date::current_zone());
 
-    app->setLocale(theLocale);
+  app->setLocale(theLocale);
 
-    app->useStyleSheet("FormalisedLog.css");
+  app->useStyleSheet("FormalisedLog.css");
 
-    app->root()->addWidget(std::make_unique<DeployTool>());
+  app->root()->addWidget(std::make_unique<DeployTool>());
 
-    return app;
+  return app;
 }
 
-int main(int argc, char **argv) {
-    try {
-      WServer server(argc, argv, WTHTTP_CONFIGURATION);
+int main(int argc, char** argv) {
+  try {
+    WServer server(argc, argv, WTHTTP_CONFIGURATION);
 
-      server.addEntryPoint(EntryPointType::Application, createApplication, "");
+    server.addEntryPoint(EntryPointType::Application, createApplication, "");
 
-      Session::configureAuth();
+    Session::configureAuth();
 
-      server.run();
-    }
-    catch (WServer::Exception& e) {
-      std::cerr << e.what() << std::endl;
-    }
-    catch (std::exception &e) {
-      std::cerr << "exception: " << e.what() << std::endl;
-    }
+    server.run();
+  }
+  catch(WServer::Exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+  catch(std::exception& e) {
+    std::cerr << "exception: " << e.what() << std::endl;
+  }
 }
