@@ -12,6 +12,7 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WTextArea.h>
 #include <Wt/WApplication.h>
+#include <Wt/WComboBox.h>
 
 class FormDialog;
 
@@ -34,7 +35,8 @@ void EditForm::update() {
   table->addStyleClass("table form-inline table-hover");
 
   table->elementAt(0, 0)->addWidget(std::make_unique<WText>("#"));
-  table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Form title"));
+  table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Logbook"));
+  table->elementAt(0, 2)->addWidget(std::make_unique<WText>("Form title"));
   table->elementAt(0, 2)->addWidget(std::make_unique<WText>("Description"));
 
   auto forms = session_.session_.find<Form>().resultList();
@@ -43,8 +45,9 @@ void EditForm::update() {
     row++;
 
     table->elementAt(row, 0)->addWidget(std::make_unique<WText>(WString("{1}").arg(row)));
-    table->elementAt(row, 1)->addWidget(std::make_unique<WText>(form->title));
-    table->elementAt(row, 2)->addWidget(std::make_unique<WText>(form->description));
+    table->elementAt(row, 1)->addWidget(std::make_unique<WText>(form->logbook));
+    table->elementAt(row, 2)->addWidget(std::make_unique<WText>(form->title));
+    table->elementAt(row, 3)->addWidget(std::make_unique<WText>(form->description));
 
     for(int i = 0; i < 3; ++i) {
       table->elementAt(row, i)->clicked().connect(this, [=] {
@@ -76,6 +79,14 @@ void FormDialog::update() {
 
   auto layout = contents()->setLayout(std::make_unique<Wt::WVBoxLayout>());
 
+  auto logbook = layout->addWidget(std::make_unique<WComboBox>());
+  int counter = 0;
+  for(auto& l : logbooks) {
+    logbook->addItem(l);
+    if(form_->logbook == l) logbook->setCurrentIndex(counter);
+    ++counter;
+  }
+
   auto formIdentifier = layout->addWidget(std::make_unique<WLineEdit>());
   formIdentifier->setPlaceholderText("Identifier (cannot be changed later)");
   formIdentifier->setText(form_.get()->identifier);
@@ -104,10 +115,11 @@ void FormDialog::update() {
     Dbo::Transaction transact(session_.session_);
     if(createNew) form_.modify()->identifier = formIdentifier->text().toUTF8();
     form_.modify()->title = formTitle->text().toUTF8();
+    form_.modify()->logbook = logbook->currentText().toUTF8();
     form_.modify()->description = formDescription->text().toUTF8();
     if(createNew) session_.session_.add(form_);
     form_.modify()->fields.clear();
-    for(size_t i = 0; i < nRows; ++i) {
+    for(size_t i = 0; i < static_cast<size_t>(nRows); ++i) {
       if(fieldTitles[i]->text().toUTF8().size() == 0) continue;
       Wt::Dbo::ptr<FormField> field = std::make_unique<FormField>();
       field.modify()->form = form_;
@@ -129,7 +141,7 @@ void FormDialog::addRow(const std::string& titleValue, const std::string& descri
   title->setPlaceholderText("Field title");
   title->setText(titleValue);
   title->setWidth(WLength("100%"));
-  size_t thisRow = nRows;
+  int thisRow = nRows;
   title->changed().connect([=] {
     if(title->text().toUTF8().size() > 0 && thisRow == this->nRows) addRow();
   });

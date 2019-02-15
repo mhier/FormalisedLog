@@ -17,6 +17,12 @@ class Form {
   std::string identifier;
   std::string title;
   std::string description;
+  std::string author;
+  std::string severity;
+  std::string keyword;
+  std::string location;
+  std::string logbook;
+  std::string intro;
   Wt::Dbo::collection<Wt::Dbo::ptr<FormField>> fields;
 
   static constexpr size_t identifierLength{20};
@@ -26,6 +32,12 @@ class Form {
     Wt::Dbo::id(a, identifier, "identifier", identifierLength); // special database key, also see below
     Wt::Dbo::field(a, title, "title");
     Wt::Dbo::field(a, description, "description");
+    Wt::Dbo::field(a, logbook, "logbook");
+    Wt::Dbo::field(a, author, "author");
+    Wt::Dbo::field(a, severity, "severity");
+    Wt::Dbo::field(a, keyword, "keyword");
+    Wt::Dbo::field(a, location, "location");
+    Wt::Dbo::field(a, intro, "intro");
     Wt::Dbo::hasMany(a, fields, Wt::Dbo::ManyToOne, "fields_of_form");
   }
 };
@@ -47,14 +59,14 @@ class FormField {
   std::string title;
   std::string description;
   std::string value;
-  dbo::ptr<Form> form;
+  Wt::Dbo::ptr<Form> form;
 
   template<class Action>
   void persist(Action& a) {
     Wt::Dbo::field(a, title, "title");
     Wt::Dbo::field(a, description, "description");
     Wt::Dbo::field(a, value, "value");
-    dbo::belongsTo(a, form, "fields_of_form");
+    Wt::Dbo::belongsTo(a, form, "fields_of_form");
   }
 };
 

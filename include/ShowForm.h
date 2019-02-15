@@ -12,6 +12,8 @@
 #include <Wt/WContainerWidget.h>
 #include <Wt/WDialog.h>
 
+#include "ElogBackend.h"
+
 using namespace Wt;
 
 class PreviewDialog;
@@ -32,6 +34,7 @@ class ShowForm : public WContainerWidget {
 class PreviewDialog : public WDialog {
  public:
   PreviewDialog(Session& session, ShowForm* owner);
+  ElogBackend backend;
 };
 
 #endif // INCLUDE_SHOW_FORM_H_

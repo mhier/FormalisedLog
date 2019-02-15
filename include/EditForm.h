@@ -44,7 +44,7 @@ class FormDialog : public WDialog {
   Session& session_;
   Wt::Dbo::ptr<Form> form_;
   bool createNew{false};
-  size_t nRows{0};
+  int nRows{0};
   WTable* table;
   std::vector<WLineEdit*> fieldTitles;
   std::vector<WLineEdit*> fieldDescriptions;

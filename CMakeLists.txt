@@ -11,6 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
 
 find_package(Boost REQUIRED COMPONENTS program_options signals system filesystem thread)
 find_package(wt REQUIRED COMPONENTS http fcgi dbo dbosqlite3 dbomysql)
+find_package(CURL REQUIRED)
 
 #add_custom_target(link_target ALL
 #                  COMMAND ${CMAKE_COMMAND} -E create_symlink /usr/share/Wt/resources ${CMAKE_BINARY_DIR}/resources)
@@ -22,4 +23,4 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/src SOURCE)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(${TARGET} ${SOURCE})
-target_link_libraries(${TARGET} ${WT_CONNECTOR} Wt::DboMySQL Wt::DboSqlite3 ${Boost_LIBRARIES})
+target_link_libraries(${TARGET} ${WT_CONNECTOR} Wt::DboMySQL Wt::DboSqlite3 ${Boost_LIBRARIES} ${CURL_LIBRARIES})

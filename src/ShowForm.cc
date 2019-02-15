@@ -13,6 +13,8 @@
 #include <Wt/WTextArea.h>
 #include <Wt/WApplication.h>
 
+#include "ElogBackend.h"
+
 ShowForm::ShowForm(Session& session, const std::string& identifier) : session_(session) {
   auto user = session_.user();
   auto layout = setLayout(std::make_unique<Wt::WVBoxLayout>());
@@ -66,14 +68,19 @@ PreviewDialog::PreviewDialog(Session& session, ShowForm* owner) {
   int nRows = 0;
   for(auto field : owner->form_->fields) {
     auto value = owner->fieldValues[static_cast<size_t>(nRows)]->text().toUTF8();
-    logEntry += field->title + ": " + value + "\n";
+    logEntry += field->title + ": " + value + "\r\n";
   }
 
   layout->addWidget(std::make_unique<Wt::WText>("<pre>" + logEntry + "</pre>"));
 
-  auto submit = footer()->addWidget(std::make_unique<WPushButton>("Submit to log book"));
-  submit->disable();
-  submit->clicked().connect([this] { this->hide(); });
+  auto submit = footer()->addWidget(std::make_unique<WPushButton>("Submit to " + owner->form_->logbook));
+  submit->clicked().connect([=] {
+    backend.setTitle(owner->form_->title);
+    backend.setText(logEntry);
+    backend.prepareNew(owner->form_->logbook);
+    backend.post();
+    this->hide();
+  });
 
   auto cancel = footer()->addWidget(std::make_unique<WPushButton>("Back"));
   cancel->clicked().connect([this] { this->hide(); });
