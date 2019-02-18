@@ -15,8 +15,8 @@ find_package(CURL REQUIRED)
 
 include_directories(${CURL_INCLUDE_DIRS})
 
-#add_custom_target(link_target ALL
-#                  COMMAND ${CMAKE_COMMAND} -E create_symlink /usr/share/Wt/resources ${CMAKE_BINARY_DIR}/resources)
+add_custom_target(link_target ALL
+                  COMMAND ${CMAKE_COMMAND} -E create_symlink /usr/share/Wt/resources ${CMAKE_BINARY_DIR}/resources)
 
 configure_file(${CMAKE_SOURCE_DIR}/FormalisedLog ${CMAKE_BINARY_DIR}/FormalisedLog COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/FormalisedLog.css ${CMAKE_BINARY_DIR}/FormalisedLog COPYONLY)
