@@ -13,6 +13,8 @@ find_package(Boost REQUIRED COMPONENTS program_options signals system filesystem
 find_package(wt REQUIRED COMPONENTS http fcgi dbo dbosqlite3 dbomysql)
 find_package(CURL REQUIRED)
 
+include_directories(${CURL_INCLUDE_DIRS})
+
 #add_custom_target(link_target ALL
 #                  COMMAND ${CMAKE_COMMAND} -E create_symlink /usr/share/Wt/resources ${CMAKE_BINARY_DIR}/resources)
 
