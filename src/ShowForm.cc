@@ -72,6 +72,18 @@ PreviewDialog::PreviewDialog(Session& session, ShowForm* owner) {
     ++nRows;
   }
 
+  // obtain date to simulate the title line
+  auto now = std::chrono::system_clock::now();
+  auto tt = std::chrono::system_clock::to_time_t(now);
+  tm local_tm = *localtime(&tt);
+
+  // form the simulated title line
+  std::string titleLine = std::to_string(local_tm.tm_mon + 1) + "/" + std::to_string(local_tm.tm_mday) + "/" +
+      std::to_string(local_tm.tm_year + 1900) + " " + std::to_string(local_tm.tm_hour) + ":" +
+      std::to_string(local_tm.tm_min);
+  titleLine += " AutomatedEntry <b>" + owner->form_->title + "</b>";
+
+  layout->addWidget(std::make_unique<Wt::WText>("<pre>" + titleLine + "</pre>"));
   layout->addWidget(std::make_unique<Wt::WText>("<pre>" + logEntry + "</pre>"));
 
   auto submit = footer()->addWidget(std::make_unique<WPushButton>("Submit to " + owner->form_->logbook));
