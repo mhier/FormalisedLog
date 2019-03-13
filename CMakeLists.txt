@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 project(FormalisedLog)
 
+set(${PROJECT_NAME}_MAJOR_VERSION 01)
+set(${PROJECT_NAME}_MINOR_VERSION 00)
+set(${PROJECT_NAME}_PATCH_VERSION 00)
+include(cmake/set_version_numbers.cmake)
+
 include(cmake/enable_latest_cxx_support.cmake)
 
 set(WT_CONNECTOR "Wt::HTTP" CACHE STRING "Connector used (Wt::HTTP or Wt::FCGI)")
@@ -26,6 +31,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(${TARGET} ${SOURCE})
 target_link_libraries(${TARGET} ${WT_CONNECTOR} Wt::DboMySQL Wt::DboSqlite3 ${Boost_LIBRARIES} ${CURL_LIBRARIES})
+
+configure_file(include/Version.h.in ${PROJECT_BINARY_DIR}/version/Version.h)
+include_directories(${PROJECT_BINARY_DIR}/version)
 
 FILE( COPY ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.css DESTINATION ${PROJECT_BINARY_DIR})
 FILE( COPY ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.cfg.template DESTINATION ${PROJECT_BINARY_DIR})

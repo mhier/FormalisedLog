@@ -2,6 +2,8 @@
  * FormalisedLog - Tool for creation of standardised log book entires at XFEL and similar DESY facilities
  */
 
+#include <iomanip>
+
 #include <Wt/WApplication.h>
 #include <Wt/Auth/AuthWidget.h>
 #include <Wt/Auth/RegistrationModel.h>
@@ -20,16 +22,22 @@
 #include "ShowForm.h"
 #include "Welcome.h"
 #include "Form.h"
+#include "Version.h"
 
 FormalisedLog::FormalisedLog() {
-  std::unique_ptr<WText> title(std::make_unique<WText>("<h1>Formalised Log Tool</h1>"));
-  addWidget(std::move(title));
+  addWidget(std::make_unique<WText>("<h1>Formalised Log Tool</h1>"));
 
   auto contentStack = std::make_unique<Wt::WStackedWidget>();
   contentStack->setHeight("100vH");
   contentStack->addStyleClass("contents");
   contentStack->setOverflow(Wt::Overflow::Auto);
   contentStack_ = addWidget(std::move(contentStack));
+
+  std::stringstream sversion;
+  sversion << std::setfill('0') << std::setw(2) << AppVersion::major << ".";
+  sversion << std::setfill('0') << std::setw(2) << AppVersion::minor << ".";
+  sversion << std::setfill('0') << std::setw(2) << AppVersion::patch;
+  addWidget(std::make_unique<WText>("<hr/>FormalisedLog " + sversion.str()));
 
   WApplication::instance()->internalPathChanged().connect(this, &FormalisedLog::handleInternalPath);
 
