@@ -28,6 +28,7 @@ void EditForm::update() {
   dbo::Transaction transaction(session_.session_);
 
   addWidget(std::make_unique<WText>("<h2>Create and edit forms</h2>"));
+  decorationStyle().setBorder({Wt::BorderStyle::Solid, {10}, {255, 0, 0}});
 
   auto table = std::make_unique<WTable>();
   table->setHeaderCount(1);
@@ -37,7 +38,7 @@ void EditForm::update() {
   table->elementAt(0, 0)->addWidget(std::make_unique<WText>("#"));
   table->elementAt(0, 1)->addWidget(std::make_unique<WText>("Logbook"));
   table->elementAt(0, 2)->addWidget(std::make_unique<WText>("Form title"));
-  table->elementAt(0, 2)->addWidget(std::make_unique<WText>("Description"));
+  table->elementAt(0, 3)->addWidget(std::make_unique<WText>("Description"));
 
   auto forms = session_.session_.find<Form>().resultList();
   int row = 0;
@@ -64,6 +65,11 @@ void EditForm::update() {
     formDialog_ = std::make_unique<FormDialog>(*this, session_, nullptr);
     formDialog_->show();
   });
+
+  addWidget(std::make_unique<Wt::WText>(" "));
+
+  auto toWelcomePage = addWidget(std::make_unique<Wt::WPushButton>("Go to front page"));
+  toWelcomePage->clicked().connect(this, [=] { WApplication::instance()->setInternalPath("/", true); });
 }
 
 /**********************************************************************************************************************/
@@ -113,7 +119,16 @@ void FormDialog::update() {
   auto save = footer()->addWidget(std::make_unique<WPushButton>("Save"));
   save->clicked().connect([=] {
     Dbo::Transaction transact(session_.session_);
-    if(createNew) form_.modify()->identifier = formIdentifier->text().toUTF8();
+    if(createNew) {
+      // check if identifier already exists
+      auto n = session_.session_.find<Form>().where("identifier = ?").bind(formIdentifier->text()).resultList().size();
+      if(n > 0) {
+        formIdentifier->setFocus(true);
+        return;
+      }
+
+      form_.modify()->identifier = formIdentifier->text().toUTF8();
+    }
     form_.modify()->title = formTitle->text().toUTF8();
     form_.modify()->logbook = logbook->currentText().toUTF8();
     form_.modify()->description = formDescription->text().toUTF8();

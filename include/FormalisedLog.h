@@ -26,7 +26,7 @@ class DeployTool : public WContainerWidget {
   void handleInternalPath(const std::string& internalPath);
 
  private:
-  WStackedWidget* mainStack_{nullptr};
+  //WStackedWidget* mainStack_{nullptr};
   WStackedWidget* contentStack_{nullptr};
 
   Wt::Auth::AuthWidget* authWidgetPtr;
