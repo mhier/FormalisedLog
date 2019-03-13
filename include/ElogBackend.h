@@ -48,9 +48,12 @@ struct ElogBackend {
 
     tm local_tm = *localtime(&tt);
     tm tm_jan1st = local_tm;
-    tm_jan1st.tm_mon = 1;
+    tm_jan1st.tm_mon = 0;
     tm_jan1st.tm_mday = 1;
-    tm_jan1st.tm_yday = 1;
+    tm_jan1st.tm_yday = 0;
+    tm_jan1st.tm_hour = 0;
+    tm_jan1st.tm_min = 0;
+    tm_jan1st.tm_sec = 0;
     auto tt_jan1st = mktime(&tm_jan1st);
     tm_jan1st = *localtime(&tt_jan1st);
 
