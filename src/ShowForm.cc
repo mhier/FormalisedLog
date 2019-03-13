@@ -63,12 +63,13 @@ PreviewDialog::PreviewDialog(Session& session, ShowForm* owner) {
   titleBar()->addWidget(std::make_unique<WText>("Preview"));
   auto layout = contents()->setLayout(std::make_unique<Wt::WVBoxLayout>());
 
-  std::string logEntry = owner->form_->title + "\n";
+  std::string logEntry;
 
   int nRows = 0;
   for(auto field : owner->form_->fields) {
     auto value = owner->fieldValues[static_cast<size_t>(nRows)]->text().toUTF8();
     logEntry += field->title + ": " + value + "\r\n";
+    ++nRows;
   }
 
   layout->addWidget(std::make_unique<Wt::WText>("<pre>" + logEntry + "</pre>"));
