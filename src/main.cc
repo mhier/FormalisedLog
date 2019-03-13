@@ -3,12 +3,13 @@
  */
 
 #include <unistd.h>
-#include <Wt/Date/tz.h>
 
 #include <Wt/WApplication.h>
+#include <Wt/WContainerWidget.h>
 #include <Wt/WServer.h>
 #include <Wt/WBootstrapTheme.h>
 #include <Wt/WLocale.h>
+#include <Wt/Date/tz.h>
 
 #include "FormalisedLog.h"
 #include "Session.h"
@@ -35,7 +36,7 @@ std::unique_ptr<WApplication> createApplication(const WEnvironment& env) {
 
   app->useStyleSheet("FormalisedLog.css");
 
-  app->root()->addWidget(std::make_unique<DeployTool>());
+  app->root()->addWidget(std::make_unique<FormalisedLog>());
 
   return app;
 }

@@ -21,7 +21,7 @@
 #include "Welcome.h"
 #include "Form.h"
 
-DeployTool::DeployTool() {
+FormalisedLog::FormalisedLog() {
   std::unique_ptr<WText> title(std::make_unique<WText>("<h1>Formalised Log Tool</h1>"));
   addWidget(std::move(title));
 
@@ -31,12 +31,12 @@ DeployTool::DeployTool() {
   contentStack->setOverflow(Wt::Overflow::Auto);
   contentStack_ = addWidget(std::move(contentStack));
 
-  WApplication::instance()->internalPathChanged().connect(this, &DeployTool::handleInternalPath);
+  WApplication::instance()->internalPathChanged().connect(this, &FormalisedLog::handleInternalPath);
 
   handleInternalPath(WApplication::instance()->internalPath());
 }
 
-void DeployTool::handleInternalPath(const std::string& internalPath) {
+void FormalisedLog::handleInternalPath(const std::string& internalPath) {
   Wt::Dbo::Transaction transaction(session_.session_);
   contentStack_->clear();
   if(internalPath == "/") {

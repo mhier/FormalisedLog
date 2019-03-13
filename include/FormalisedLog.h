@@ -19,9 +19,9 @@ namespace Wt {
 
 class Session;
 
-class DeployTool : public WContainerWidget {
+class FormalisedLog : public WContainerWidget {
  public:
-  DeployTool();
+  FormalisedLog();
 
   void handleInternalPath(const std::string& internalPath);
 
