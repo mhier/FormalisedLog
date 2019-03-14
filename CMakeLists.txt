@@ -14,8 +14,8 @@ set(TARGET FormalisedLog.wt)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
 
-find_package(Boost REQUIRED COMPONENTS program_options signals system filesystem thread)
-find_package(wt REQUIRED COMPONENTS http fcgi dbo dbosqlite3 dbomysql)
+find_package(Boost REQUIRED COMPONENTS program_options system filesystem thread)
+find_package(wt REQUIRED COMPONENTS http dbo dbosqlite3 dbomysql)
 find_package(CURL REQUIRED)
 
 include_directories(${CURL_INCLUDE_DIRS})
